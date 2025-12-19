@@ -1,0 +1,46 @@
+# ================================
+# Janmasethu Clinical OS - Docker Compose
+# ================================
+version: '3.8'
+
+services:
+  # ================================
+  # Main Application
+  # ================================
+  clinical-os:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: janmasethu-clinical-os
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      # Supabase credentials - MUST be set before running
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/dashboard/summary"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - clinical-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ================================
+# Networks
+# ================================
+networks:
+  clinical-network:
+    driver: bridge
+    name: janmasethu-network
