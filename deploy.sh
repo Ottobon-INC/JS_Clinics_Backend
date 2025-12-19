@@ -100,7 +100,7 @@ if $DOCKER_COMPOSE ps | grep -q "Up"; then
     echo "  Deployment Successful!"
     echo "========================================${NC}"
     echo ""
-    echo "Application is running at: http://localhost:3000"
+    echo "Application is running at: http://localhost:${PORT:-200}"
     echo ""
     echo "Useful commands:"
     echo "  - View logs:     $DOCKER_COMPOSE logs -f"

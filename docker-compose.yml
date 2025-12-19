@@ -14,7 +14,7 @@ services:
     container_name: janmasethu-clinical-os
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${PORT:-200}:3000"
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
