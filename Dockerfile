@@ -27,6 +27,9 @@ COPY . .
 # Set Next.js to output standalone for smaller image
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Ensure public directory exists even if repo doesn't include one
+RUN mkdir -p public
+
 # Build the application
 RUN npm run build
 
