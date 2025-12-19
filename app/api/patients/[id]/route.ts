@@ -103,7 +103,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
       registration_date: toValue(body.registration_date) ?? toValue(body.date),
       status: toValue(body.status),
     });
-    delete sanitized.id;
+    delete (sanitized as any).id;
     delete (sanitized as any).uhid;
     delete (sanitized as any).created_at;
 
