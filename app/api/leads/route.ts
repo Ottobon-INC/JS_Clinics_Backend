@@ -282,8 +282,8 @@ export async function OPTIONS() {
 }
 
 export async function GET(request: Request) {
-  const { error: authError } = await validateSession(request);
-  if (authError) return authError;
+  // const { error: authError } = await validateSession(request);
+  // if (authError) return authError;
 
   const supabase = getSupabaseAdmin();
   const { searchParams } = new URL(request.url);
@@ -342,8 +342,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { error: authError } = await validateSession(request);
-  if (authError) return authError;
+  // const { error: authError } = await validateSession(request);
+  // if (authError) return authError;
 
   const supabase = getSupabaseAdmin();
 
