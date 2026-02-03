@@ -14,11 +14,30 @@ export async function validateSession(request: Request) {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const supabase = getSupabaseAdmin();
+    // const supabase = getSupabaseAdmin(); // No longer needed for session check
 
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    try {
+        const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_do_not_use_in_prod';
 
-    if (error || !user) {
+        // Dynamic import to avoid build-time issues if possible, though standard import is fine usually.
+        // We use 'require' here or just standard import. Assuming 'jsonwebtoken' is installed.
+        const jwt = require('jsonwebtoken'); // Using require to ensure we use the installed commonjs module
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+
+        // Return user structure similar to what Supabase would return, 
+        // to ensure compatibility with existing code that expects { user: { id... } }
+        return {
+            user: {
+                id: decoded.sub,
+                email: decoded.email,
+                role: decoded.role,
+                ...decoded
+            }
+        };
+
+    } catch (err) {
+        console.error('Token validation failed:', err);
         return {
             error: NextResponse.json(
                 { success: false, error: 'Invalid or expired token' },
@@ -26,6 +45,4 @@ export async function validateSession(request: Request) {
             )
         };
     }
-
-    return { user };
 }

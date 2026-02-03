@@ -1,0 +1,8 @@
+app/api/control-tower/doctor-utilization/route.ts(4,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+app/api/control-tower/lead-summary/route.ts(4,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+app/api/control-tower/live-queue/route.ts(4,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+app/api/control-tower/patient-flow-summary/route.ts(4,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+app/api/control-tower/waiting-alerts/route.ts(4,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+app/api/leads/bulk/route.ts(5,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+app/api/leads/export/route.ts(4,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+app/api/leads/route.ts(4,33): error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
