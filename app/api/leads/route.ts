@@ -209,6 +209,32 @@ const COLUMN_MAPPINGS: Record<string, string> = {
   'salesperson': 'assigned_to_user_id', 'SalesPerson': 'assigned_to_user_id', 'Sales Person': 'assigned_to_user_id',
   'handler': 'assigned_to_user_id', 'Handler': 'assigned_to_user_id',
   'staff': 'assigned_to_user_id', 'Staff': 'assigned_to_user_id', 'STAFF': 'assigned_to_user_id',
+
+  // Guardian variations
+  'guardianname': 'guardian_name', 'GuardianName': 'guardian_name', 'Guardian Name': 'guardian_name', 'guardian name': 'guardian_name',
+  'husbandname': 'guardian_name', 'HusbandName': 'guardian_name', 'Husband Name': 'guardian_name', 'husband name': 'guardian_name',
+  'husband/guardian name': 'guardian_name', 'Husband/Guardian Name': 'guardian_name',
+  'husband_or_guardian_name': 'guardian_name', 'Husband_Or_Guardian_Name': 'guardian_name', // Exact frontend match
+
+  // Guardian Age variations
+  'guardianage': 'guardian_age', 'GuardianAge': 'guardian_age', 'Guardian Age': 'guardian_age', 'guardian age': 'guardian_age',
+  'husbandage': 'guardian_age', 'HusbandAge': 'guardian_age', 'Husband Age': 'guardian_age', 'husband age': 'guardian_age',
+  'husband_age': 'guardian_age', 'Husband_Age': 'guardian_age', // Exact frontend match
+
+  // Location/City variations
+  'location': 'location', 'Location': 'location', 'LOCATION': 'location',
+  'city': 'location', 'City': 'location', 'CITY': 'location',
+  'city/location': 'location', 'City/Location': 'location',
+  'address': 'location', 'Address': 'location',
+
+  // Alternate Phone variations
+  'alternatephone': 'alternate_phone', 'AlternatePhone': 'alternate_phone', 'Alternate Phone': 'alternate_phone', 'alternate phone': 'alternate_phone',
+  'altphone': 'alternate_phone', 'AltPhone': 'alternate_phone', 'Alt Phone': 'alternate_phone', 'alt phone': 'alternate_phone',
+  'alternative phone number': 'alternate_phone', 'Alternative Phone Number': 'alternate_phone',
+  'alternative_phone_number': 'alternate_phone', 'Alternative_Phone_Number': 'alternate_phone', // Exact frontend match
+
+  // Referral Required variations
+  'referralrequired': 'referral_required', 'ReferralRequired': 'referral_required', 'Referral Required': 'referral_required', 'referral required': 'referral_required',
 };
 
 // Normalize a lead object by mapping its keys to expected field names
@@ -359,9 +385,10 @@ export async function POST(request: Request) {
     // Normalize the incoming data to handle different column name formats
     const body = normalizeLead(rawBody);
 
-    // Log for debugging
-    console.log('POST /api/leads - Received raw:', JSON.stringify(rawBody));
-    console.log('POST /api/leads - Normalized:', JSON.stringify(body));
+    // Log for debugging (Removed)
+    // console.log('POST /api/leads - Received raw:', JSON.stringify(rawBody));
+    // console.log('POST /api/leads - Raw Keys:', Object.keys(rawBody));
+    // console.log('POST /api/leads - Normalized:', JSON.stringify(body));
 
     const name = toValue(body.name);
     const phone = toValue(body.phone);
@@ -375,6 +402,11 @@ export async function POST(request: Request) {
     const treatment_doctor = toValue(body.treatment_doctor);
     const treatment_suggested = toValue(body.treatment_suggested);
     const assigned_to_user_id = toValue(body.assigned_to_user_id);
+    const guardian_name = toValue(body.guardian_name);
+    const guardian_age = toValue(body.guardian_age);
+    const location = toValue(body.location);
+    const alternate_phone = toValue(body.alternate_phone);
+    const referral_required = toValue(body.referral_required);
 
     if (!name || !phone) {
       return NextResponse.json(
@@ -396,6 +428,11 @@ export async function POST(request: Request) {
       treatment_doctor: encrypt(treatment_doctor),
       treatment_suggested: encrypt(treatment_suggested),
       assigned_to_user_id,
+      guardian_name,
+      guardian_age,
+      location,
+      alternate_phone,
+      referral_required,
     });
 
     console.log('POST /api/leads - Final payload:', JSON.stringify(payload));

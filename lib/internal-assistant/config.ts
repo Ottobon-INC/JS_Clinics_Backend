@@ -6,7 +6,7 @@ export const INTENT_CONFIG: Record<Intent, IntentConfig> = {
         intent: Intent.GET_STALLING_LEADS,
         allowedRoles: ['admin', 'cro'],
         sanitization: {
-            allowedFields: ['status', 'reason', 'assigned_to_user_id', 'date_added', 'age', 'gender', 'inquiry', 'source', 'lead_display_id'], // 'lead_display_id' is hypothetical, maybe use 'id' if it's not a UUID
+            allowedFields: ['leads', 'total_count', 'status', 'reason', 'assigned_to_user_id', 'date_added', 'age', 'gender', 'inquiry', 'source'],
         },
         description: 'Fetch leads that are stalling or have not been followed up recently.',
     },
@@ -14,25 +14,52 @@ export const INTENT_CONFIG: Record<Intent, IntentConfig> = {
         intent: Intent.GET_TODAY_APPOINTMENTS,
         allowedRoles: ['admin', 'cro', 'doctor', 'front_desk'],
         sanitization: {
-            allowedFields: ['appointment_time', 'status', 'type', 'doctor_name', 'patient_first_name'],
+            allowedFields: ['total_count', 'breakdown', 'my_appointments_count'],
         },
-        description: 'Fetch all appointments scheduled for today.',
+        description: 'Check schedule, count appointments, or see what is coming up today.',
     },
     [Intent.GET_WAITING_PATIENTS]: {
         intent: Intent.GET_WAITING_PATIENTS,
-        allowedRoles: ['admin', 'cro', 'doctor', 'front_desk'],
+        allowedRoles: ['admin', 'cro', 'front_desk'],
         sanitization: {
-            allowedFields: ['check_in_time', 'wait_time_minutes', 'status', 'token_number'],
+            allowedFields: ['total_waiting', 'max_wait_time_minutes', 'long_wait_count'],
         },
-        description: 'Fetch list of patients currently waiting in the clinic.',
+        description: 'Check if anyone is waiting, who is waiting, or queue status.',
     },
-    [Intent.GET_CONTROL_TOWER_SUMMARY]: {
-        intent: Intent.GET_CONTROL_TOWER_SUMMARY,
+    [Intent.GET_CLINIC_SUMMARY]: {
+        intent: Intent.GET_CLINIC_SUMMARY,
         allowedRoles: ['admin', 'cro'],
         sanitization: {
-            allowedFields: ['total_leads_today', 'total_appointments_today', 'lead_status_breakdown', 'revenue', 'critical_alerts_count'],
+            allowedFields: ['total_leads_today', 'total_appointments_today', 'total_waiting_patients', 'stalling_leads_count'],
         },
-        description: 'Get a high-level summary of clinic operations from the Control Tower.',
+        description: 'Get a high-level overview or summary of the clinic status today.',
+    },
+    [Intent.ACTION_CHECK_IN_PATIENT]: {
+        intent: Intent.ACTION_CHECK_IN_PATIENT,
+        allowedRoles: ['cro', 'front_desk'], // NO ADMIN, NO DOCTOR
+        sanitization: {
+            allowedFields: ['id', 'patientName', 'time', 'doctorName'], // Minimal fields for confirmation list
+        },
+        description: 'Check in a patient who has arrived for their appointment.',
+        confirmationRequired: true
+    },
+    [Intent.ACTION_MARK_APPOINTMENT_COMPLETED]: {
+        intent: Intent.ACTION_MARK_APPOINTMENT_COMPLETED,
+        allowedRoles: ['cro'], // STRICT: ONLY CRO
+        sanitization: {
+            allowedFields: ['id', 'patientName', 'time', 'doctorName'],
+        },
+        description: 'Mark a checked-in appointment as completed.',
+        confirmationRequired: true
+    },
+    [Intent.ACTION_MARK_PATIENT_NO_SHOW]: {
+        intent: Intent.ACTION_MARK_PATIENT_NO_SHOW,
+        allowedRoles: ['cro'], // STRICT: ONLY CRO
+        sanitization: {
+            allowedFields: ['id', 'patientName', 'time', 'doctorName'],
+        },
+        description: 'Mark a scheduled appointment as a no-show.',
+        confirmationRequired: true
     },
     [Intent.UNKNOWN]: {
         intent: Intent.UNKNOWN,

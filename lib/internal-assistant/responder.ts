@@ -7,9 +7,9 @@ const openai = new OpenAI({
 });
 
 export class Responder {
-    static async generateResponse(intent: Intent, data: any): Promise<string> {
+    static async generateResponse(intent: Intent, data: any, userMessage: string = ""): Promise<string> {
         if (intent === Intent.UNKNOWN) {
-            return "I'm sorry, I didn't understand that request. I can help you with stalling leads, today's appointments, waiting patients, or a control tower summary.";
+            return "I'm sorry, I didn't understand that request. I can help you with stalling leads, today's appointments, waiting patients, or a clinic summary.";
         }
 
         if (!data) {
@@ -21,9 +21,15 @@ export class Responder {
         }
 
         try {
+            let contextNote = "";
+            if (intent === Intent.GET_STALLING_LEADS) {
+                contextNote = "Note: The provided list contains leads that are considered 'stalling' because they have been in 'New Inquiry' or 'Follow Up' status for a long time without conversion. Please treat them as stalling leads.";
+            }
+
             const systemPrompt = `
 You are a helpful internal assistant for a clinic.
 Your task is to answer the user's question based ONLY on the provided JSON data.
+${contextNote}
 
 Rules:
 1. Do NOT make up facts.
@@ -37,7 +43,7 @@ Rules:
                 model: 'gpt-4o', // or gpt-3.5-turbo
                 messages: [
                     { role: 'system', content: systemPrompt },
-                    { role: 'user', content: `Intent: ${intent}\nData: ${JSON.stringify(data)}` },
+                    { role: 'user', content: `Original Question: "${userMessage}"\nIntent: ${intent}\nData: ${JSON.stringify(data)}` },
                 ],
                 temperature: 0.2, // Low temperature for factual accuracy
             });

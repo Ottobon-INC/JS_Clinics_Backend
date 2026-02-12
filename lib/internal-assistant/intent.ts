@@ -9,10 +9,10 @@ const openai = new OpenAI({
 });
 
 export class IntentClassifier {
-    static async classify(message: string): Promise<Intent> {
+    static async classify(message: string): Promise<{ intent: Intent, searchHint?: string }> {
         if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.startsWith('sk-placeholder')) {
             console.warn('OpenAI API Key is missing or invalid. Returning UNKNOWN.');
-            return Intent.UNKNOWN;
+            return { intent: Intent.UNKNOWN };
         }
 
         try {
@@ -29,30 +29,37 @@ ${validIntents}
 
 - UNKNOWN: If the message does not match any of the above.
 
-Output ONLY the Intent Name (e.g., GET_STALLING_LEADS). Do not add any explanation.
+Rules:
+1. Output JSON ONLY.
+2. Structure: { "intent": "INTENT_NAME", "searchHint": "extracted entity" }
+3. "searchHint" is needed for ACTION_CHECK_IN_PATIENT, ACTION_MARK_APPOINTMENT_COMPLETED, and ACTION_MARK_PATIENT_NO_SHOW (extract the patient name).
+4. For others, "searchHint" can be null.
       `.trim();
 
             const response = await openai.chat.completions.create({
-                model: 'gpt-4o', // or gpt-3.5-turbo
+                model: 'gpt-4o',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: message },
                 ],
                 temperature: 0,
-                max_tokens: 20,
+                response_format: { type: "json_object" }, // Enforce JSON
+                max_tokens: 100,
             });
 
-            const text = response.choices[0]?.message?.content?.trim();
-
-            if (text && text in Intent) {
-                return text as Intent;
+            const content = response.choices[0]?.message?.content?.trim();
+            if (content) {
+                const parsed = JSON.parse(content);
+                if (parsed.intent && parsed.intent in Intent) {
+                    return { intent: parsed.intent as Intent, searchHint: parsed.searchHint };
+                }
             }
 
-            return Intent.UNKNOWN;
+            return { intent: Intent.UNKNOWN };
 
         } catch (error) {
             console.error('Error classifying intent:', error);
-            return Intent.UNKNOWN;
+            return { intent: Intent.UNKNOWN };
         }
     }
 }
