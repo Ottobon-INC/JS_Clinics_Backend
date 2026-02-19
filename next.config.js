@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   // Required for Docker deployment - creates standalone build
-  output: 'standalone',
+  // output: 'standalone',
 };
 
 module.exports = nextConfig;

@@ -59,6 +59,11 @@ export async function POST(request: Request) {
         }
 
         if (!isMatch) {
+            console.log('Login Failed: Password mismatch', {
+                hasHash: !!user.password_hash,
+                hashMatch: verify(password, user.password_hash),
+                plainMatch: user.password_hash === password
+            });
             return NextResponse.json(
                 { success: false, error: 'Invalid credentials' },
                 { status: 401 }
