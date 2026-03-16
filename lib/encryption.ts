@@ -10,10 +10,14 @@ function getKey(): Buffer {
     if (!secret) {
         throw new Error('ENCRYPTION_KEY is not defined');
     }
-    // If the key is hex, parse it. Otherwise use it directly (though 32 hex chars = 16 bytes, we strictly need 32 bytes for aes-256)
-    // My generated key is 32 bytes -> 64 hex chars. 
-    // Buffer.from(hex, 'hex') gives 32 bytes.
-    return Buffer.from(secret, 'hex');
+    const keyBuffer = Buffer.from(secret, 'hex');
+    console.log(`[DEBUG] Encryption Key: Loaded from env. RAW Length: ${secret.length}, Buffer Length: ${keyBuffer.length}`);
+
+    if (keyBuffer.length !== 32) {
+        console.error(`[CRITICAL] Invalid Key Length! Expected 32 bytes, got ${keyBuffer.length}. string=${secret.substring(0, 5)}...`);
+    }
+
+    return keyBuffer;
 }
 
 export function encrypt(text: string): string {
