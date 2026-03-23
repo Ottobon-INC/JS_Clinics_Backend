@@ -120,20 +120,34 @@ export async function PATCH(request: Request, context: { params: { id: string } 
         // If non-UUID is sent, skip updating doctor_id to avoid hard failure
         validatedDoctorId = undefined;
       } else {
-        const { data: doctor, error: doctorError } = await supabase
-          .from('sakhi_clinic_users')
+        // Check sakhi_clinic_staff first (new system)
+        const { data: staffDoc, error: staffDocErr } = await supabase
+          .from('sakhi_clinic_staff')
           .select('id')
           .eq('id', body.doctor_id)
-          .single();
+          .maybeSingle();
 
-        if (doctorError?.code === 'PGRST116' || !doctor) {
-          return NextResponse.json(
-            { success: false, error: 'Doctor not found', code: 'DOCTOR_NOT_FOUND' },
-            { status: 404, headers: corsHeaders }
-          );
+        if (staffDocErr && staffDocErr.code !== 'PGRST116') {
+          // Table might not exist yet — try fallback
         }
 
-        if (doctorError) throw doctorError;
+        if (!staffDoc) {
+          // Fallback: sakhi_clinic_users (legacy)
+          const { data: doctor, error: doctorError } = await supabase
+            .from('sakhi_clinic_users')
+            .select('id')
+            .eq('id', body.doctor_id)
+            .single();
+
+          if (doctorError?.code === 'PGRST116' || !doctor) {
+            return NextResponse.json(
+              { success: false, error: 'Doctor not found', code: 'DOCTOR_NOT_FOUND' },
+              { status: 404, headers: corsHeaders }
+            );
+          }
+
+          if (doctorError) throw doctorError;
+        }
       }
     }
 

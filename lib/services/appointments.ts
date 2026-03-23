@@ -204,17 +204,33 @@ export class AppointmentsService {
         }
 
         if (doctor_id && !doctorNameSnapshot) {
-            const { data: doctorRow, error: doctorNameError } = await supabase
-                .from('sakhi_clinic_users')
+            // Try sakhi_clinic_staff first (new system)
+            const { data: staffRow, error: staffErr } = await supabase
+                .from('sakhi_clinic_staff')
                 .select('name')
                 .eq('id', doctor_id)
                 .maybeSingle();
 
-            if (doctorNameError && doctorNameError.code !== 'PGRST116') {
-                throw doctorNameError;
+            if (staffErr && staffErr.code !== 'PGRST116') {
+                // Table might not exist yet — ignore and try fallback
             }
 
-            doctorNameSnapshot = doctorRow?.name ?? doctorNameSnapshot;
+            if (staffRow?.name) {
+                doctorNameSnapshot = staffRow.name;
+            } else {
+                // Fallback: sakhi_clinic_users (legacy)
+                const { data: doctorRow, error: doctorNameError } = await supabase
+                    .from('sakhi_clinic_users')
+                    .select('name')
+                    .eq('id', doctor_id)
+                    .maybeSingle();
+
+                if (doctorNameError && doctorNameError.code !== 'PGRST116') {
+                    throw doctorNameError;
+                }
+
+                doctorNameSnapshot = doctorRow?.name ?? doctorNameSnapshot;
+            }
         }
 
         const payload = sanitizePayload({
