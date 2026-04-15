@@ -3,10 +3,14 @@ import OpenAI from 'openai';
 import { Intent } from './types';
 import { INTENT_CONFIG } from './config';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy-initialize OpenAI client to avoid build-time errors when API key is not set
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+    if (!_openai) {
+        _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    }
+    return _openai;
+}
 
 export class IntentClassifier {
     static async classify(message: string): Promise<{ intent: Intent, searchHint?: string }> {
@@ -36,7 +40,7 @@ Rules:
 4. For others, "searchHint" can be null.
       `.trim();
 
-            const response = await openai.chat.completions.create({
+            const response = await getOpenAI().chat.completions.create({
                 model: 'gpt-4o',
                 messages: [
                     { role: 'system', content: systemPrompt },

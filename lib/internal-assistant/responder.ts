@@ -2,9 +2,14 @@
 import OpenAI from 'openai';
 import { Intent } from './types';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy-initialize OpenAI client to avoid build-time errors when API key is not set
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+    if (!_openai) {
+        _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    }
+    return _openai;
+}
 
 export class Responder {
     static async generateResponse(intent: Intent, data: any, userMessage: string = ""): Promise<string> {
@@ -39,7 +44,7 @@ Rules:
 5. Refer to "Display IDs" or "First Names" if present, do not expose internal UUIDs unless explicitly shown in the "lead_display_id" field.
       `.trim();
 
-            const response = await openai.chat.completions.create({
+            const response = await getOpenAI().chat.completions.create({
                 model: 'gpt-4o', // or gpt-3.5-turbo
                 messages: [
                     { role: 'system', content: systemPrompt },
