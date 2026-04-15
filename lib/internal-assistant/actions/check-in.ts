@@ -3,7 +3,11 @@ import { AuditLogger } from '../audit-log';
 import { Role } from '../types';
 
 export class CheckInAction {
-    private static supabase = getSupabaseAdmin();
+    private static _supabase: ReturnType<typeof getSupabaseAdmin> | null = null;
+    private static get supabase() {
+        if (!this._supabase) this._supabase = getSupabaseAdmin();
+        return this._supabase;
+    }
 
     /**
      * Step 3: Search for patient to check in.

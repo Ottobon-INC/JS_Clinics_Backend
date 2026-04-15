@@ -3,7 +3,11 @@ import { AuditLogger } from '../audit-log';
 import { Role } from '../types';
 
 export class MarkNoShowAction {
-    private static supabase = getSupabaseAdmin();
+    private static _supabase: ReturnType<typeof getSupabaseAdmin> | null = null;
+    private static get supabase() {
+        if (!this._supabase) this._supabase = getSupabaseAdmin();
+        return this._supabase;
+    }
 
     static async search(nameHint: string) {
         // Extended Logic: Allow marking for last 3 days

@@ -4,7 +4,11 @@ import { decrypt } from '@/lib/encryption';
 import { Intent, Role } from './types';
 
 export class DataFetcher {
-    private static supabase = getSupabaseAdmin();
+    private static _supabase: ReturnType<typeof getSupabaseAdmin> | null = null;
+    private static get supabase() {
+        if (!this._supabase) this._supabase = getSupabaseAdmin();
+        return this._supabase;
+    }
 
     static async fetchData(intent: Intent, userRole: Role, userId: string): Promise<any> {
         switch (intent) {
